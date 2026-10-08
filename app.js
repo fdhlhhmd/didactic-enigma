@@ -4,7 +4,8 @@ let T = null,
   view = "gallery",
   tab = "active",
   cur = null,
-  modal = false;
+  modal = false,
+  draggedId = null;
 try {
   lists = JSON.parse(localStorage.getItem(KEY) || "[]");
 } catch (e) {
@@ -195,7 +196,7 @@ function gallery(app) {
         isD = ([x]) => x.k === "check" && x.d,
         todo = all.filter((z) => !isD(z)),
         done = all.filter(isD);
-      return `<section class="strip ${op ? "open" : ""}" data-id="${l.id}" style="background:var(--c${n})">
+      return `<section class="strip ${op ? "open " : ""}${t > 0 && d === t ? "completed" : ""}" data-id="${l.id}" draggable="true" style="background:var(--c${n})">
   <div class="head" data-open="${l.id}"><button class="tg" data-open="${l.id}" aria-expanded="${op}"><span class="ttl">${esc(l.t || T.ui.untitled)}</span></button><div class="hb">${l.s === "resolved" ? ib("undo", `data-restore="${l.id}"`, T.ui.restore) : ib("edit", `data-edit="${l.id}"`, T.ui.editList)}${ib("del", `data-del="${l.id}"`, T.ui.deleteList)}</div>${t ? `<span class="cnt">${d}/${t}</span>` : ""}</div>
   <div class="body"><div class="in"><div class="todo">${todo.map(row).join("")}</div>${done.length ? `<div class="donebox">${done.map(row).join("")}</div>` : ""}</div></div></section>`;
     })
@@ -220,7 +221,27 @@ function fit() {
     n.style.maxWidth = "";
     z.style.setProperty("--sw", Math.min(mx, Math.max(240, w)) + "px");
     const d = z.querySelector(".donebox");
-    z.style.setProperty("--fill", d ? d.offsetHeight + "px" : "0px");
+    z.style.setProperty(
+      "--fill",
+      z.classList.contains("completed")
+        ? "100%"
+        : d
+          ? d.offsetHeight + "px"
+          : "0px",
+    );
+  });
+}
+function focusCurrentStrip() {
+  requestAnimationFrame(() => {
+    const strip = [...document.querySelectorAll(".strip")].find(
+      (z) => z.dataset.id === cur,
+    );
+    if (strip)
+      strip.scrollIntoView({
+        behavior: "smooth",
+        block: "nearest",
+        inline: "nearest",
+      });
   });
 }
 addEventListener("resize", fit);
@@ -407,6 +428,7 @@ document.addEventListener("click", (e) => {
     const [d, t] = prog(l);
     modal = t > 0 && d === t && l.s !== "resolved";
     render();
+    focusCurrentStrip();
   } else if (g("[data-repeat]")) {
     const l = lists.find((y) => y.id === cur);
     l.items.forEach((i) => {
@@ -435,6 +457,40 @@ document.addEventListener("click", (e) => {
     cur = null;
     render();
   }
+});
+document.addEventListener("dragstart", (e) => {
+  const strip = e.target.closest && e.target.closest(".strip");
+  if (!strip) return;
+  draggedId = strip.dataset.id;
+  strip.classList.add("dragging");
+  e.dataTransfer.effectAllowed = "move";
+  e.dataTransfer.setData("text/plain", draggedId);
+});
+document.addEventListener("dragover", (e) => {
+  if (e.target.closest && e.target.closest(".strip")) e.preventDefault();
+});
+document.addEventListener("drop", (e) => {
+  const target = e.target.closest && e.target.closest(".strip");
+  if (!target || !draggedId || target.dataset.id === draggedId) return;
+  e.preventDefault();
+  const visible = lists.filter((l) =>
+    tab === "active" ? l.s !== "resolved" : l.s === "resolved",
+  );
+  const from = visible.findIndex((l) => l.id === draggedId);
+  const to = visible.findIndex((l) => l.id === target.dataset.id);
+  if (from < 0 || to < 0) return;
+  const moved = visible.splice(from, 1)[0];
+  visible.splice(to, 0, moved);
+  const visibleIds = new Set(visible.map((l) => l.id));
+  let position = 0;
+  lists = lists.map((l) => (visibleIds.has(l.id) ? visible[position++] : l));
+  save();
+  render();
+  focusCurrentStrip();
+});
+document.addEventListener("dragend", () => {
+  document.querySelector(".strip.dragging")?.classList.remove("dragging");
+  draggedId = null;
 });
 document.addEventListener("mouseout", (e) => {
   const z = e.target.closest && e.target.closest(".strip.shut");

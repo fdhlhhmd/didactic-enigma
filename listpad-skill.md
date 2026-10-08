@@ -168,6 +168,8 @@ Space Grotesk everywhere. Base `500 16px/1.5`.
 - **Open (`.strip.open`)**: the body width becomes `var(--sw)`, and the head turns solid `--pill` with white text. `--dn` inside the open head becomes `rgba(255,255,255,.4)`.
 - **Hover (only on `(hover:hover)` devices):** hovering a closed strip opens it as a preview, using the same styles as open, but only while no strip is pinned (`.stack:not(.has-open)`) and the strip is not `.shut`.
 - **Click or tap** toggles a strip open (pinned). Opening one strip closes the others. Closing by click adds `.shut` to that strip so it does not instantly re-open from hover, and `.shut` is removed on `mouseout`. After opening, scroll the strip into view with `scrollIntoView({behavior:'smooth', block:'nearest', inline:'start'})`.
+- Strips are draggable. Dropping a strip on another strip reorders the visible lists, saves the new order, and keeps the moved strip open and in view. The edit, restore, and delete controls remain hover-only.
+- Checking an item rerenders the gallery; after that rerender, scroll the currently open strip back into view so it remains the visual focus.
 - The mouse wheel scrolls the shelf sideways when the pointer is not over an open list.
 
 **Open width follows the content (`--sw`)**, set per strip in a `fit()` function:
@@ -367,4 +369,4 @@ Check each item before calling the build done.
 
 ## 12. Out of scope
 
-Accounts, sync, export or import, drag-to-reorder, nested lists, ticking bullet or plain lines, reminders or notifications, offline caching by default.
+Accounts, sync, export or import, nested lists, ticking bullet or plain lines, reminders or notifications, offline caching by default.

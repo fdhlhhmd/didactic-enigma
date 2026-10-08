@@ -12,6 +12,7 @@ It is a small static site: plain HTML, CSS and JavaScript, with the text content
   - **•≡** for a bullet list
 - **Enter on a checkbox line** starts the next checkbox. Enter on an empty checkbox line turns it back into a normal line.
 - **Strip gallery.** Each list is a narrow vertical strip showing its title and a done count (for example `2/5`).
+  - Drag and drop strips to rearrange them. The order is saved in the browser.
   - Hover a strip on a computer, or tap it on a phone, to open it.
   - Click a strip on a computer to pin it open. Click again to close it.
   - An open strip is as wide as its longest line. Lines wrap when they would run off the screen.
@@ -135,4 +136,4 @@ To reset the app, clear the site's data in your browser, or delete the four keys
 - Lists exist only in one browser on one device. There is no export or import.
 - Bullet and plain lines can't be ticked. Only checkbox lines count toward progress.
 - Lists with no checkbox lines show no progress and never trigger the completion popup.
-- Nested lists and drag-to-reorder aren't supported.
+- Nested lists aren't supported.
